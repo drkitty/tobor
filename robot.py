@@ -6,6 +6,8 @@ from itertools import ifilter
 from sys import stderr
 
 from config import USERNAME, PASSWORD
+from models import Base, ResponseMap
+from orm import engine, Session
 from plugins import PLUGINS
 
 
@@ -13,6 +15,9 @@ class Robot(object):
     def __init__(self):
         self.client = irc.client.IRC()
         self.server = self.client.server()
+
+        self.session = Session()
+        Base.metadata.create_all(engine)
 
     def disconnect(self):
         stderr.write('Disconnecting...\n')
@@ -48,6 +53,11 @@ class Robot(object):
         plugins = filter(lambda p: not p[0], PLUGINS)
         for _, func in plugins:
             response = func(msg, sender, channel)
+            if response:
+                return response
+
+        for rm in self.session.query(ResponseMap).all():
+            response = rm.search(msg)
             if response:
                 return response
 
