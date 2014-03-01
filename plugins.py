@@ -19,5 +19,5 @@ def die(msg, sender, channel):
 PLUGINS = [
     ('die', die),
     ('repeat', repeat),
-    (False, elipsis),
+    (None, elipsis),
 ]

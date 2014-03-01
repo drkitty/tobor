@@ -14,14 +14,17 @@ class Robot(object):
         self.client = irc.client.IRC()
         self.server = self.client.server()
 
+    def disconnect(self):
+        stderr.write('Disconnecting...\n')
+        self.client.disconnect_all()
+        self.server.disconnect()
+
     def __enter__(self):
         self.connect()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        stderr.write('Disconnecting...\n')
-        self.client.disconnect_all()
-        self.server.disconnect()
+        self.disconnect()
 
     def connect(self):
         def handler_wrapper(func):
@@ -72,7 +75,7 @@ class Robot(object):
         splat = msg.split(':', 1)
         if len(splat) == 1:
             response = self.handle_normal(msg, sender, channel)
-        elif len(splat) == 2 and USERNAME in splat[0]:
+        elif len(splat) == 2 and splat[0].strip() == USERNAME:
             response = self.handle_mentioned(splat[1].lstrip(), sender,
                                              channel)
 
